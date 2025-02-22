@@ -31,6 +31,9 @@ public class User implements Serializable {
   @Column(nullable = false, unique = true)
   private String username;
 
+  @Column(nullable = false, unique = false)
+  private String password;
+
   @Column(nullable = false, unique = true)
   private String token;
 
@@ -60,6 +63,13 @@ public class User implements Serializable {
   public void setUsername(String username) {
     this.username = username;
   }
+
+  public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
   public String getToken() {
     return token;
