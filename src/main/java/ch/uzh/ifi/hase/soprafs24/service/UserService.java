@@ -60,7 +60,10 @@ public class UserService {
     log.debug("Created Information for User: {}", newUser);
     return newUser;
   }
-
+  public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
