@@ -46,15 +46,19 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong password");
         }
         else {
-            return checkIfUserExists(newUser);
+            existinguser.setStatus(UserStatus.ONLINE);
+            userRepository.save(existinguser);
+            return existinguser;
+
         }
     }
+    else {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setStatus(UserStatus.ONLINE);
     newUser.setCreationDate(new Date());
     // saves the given entity but data is only persisted in the database once
     // flush() is called
-    newUser = userRepository.save(newUser);
+    newUser = userRepository.save(newUser);}
     userRepository.flush();
 
     log.debug("Created Information for User: {}", newUser);
@@ -63,6 +67,17 @@ public class UserService {
   public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+    public User getUserByToken(String token) {
+        return userRepository.findByToken(token);
+    }
+    public Boolean verifyToken(String tokenToVerify){
+        User UserToVerify = userRepository.findByToken(tokenToVerify);
+        if (!(UserToVerify != null && UserToVerify.getStatus()== UserStatus.ONLINE)){
+            String baseErrorMessage = UserToVerify.getToken();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, baseErrorMessage);
+        }
+        return true;
     }
   /**
    * This is a helper method that will check the uniqueness criteria of the
