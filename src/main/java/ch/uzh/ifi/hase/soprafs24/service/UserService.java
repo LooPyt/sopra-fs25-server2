@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
-
+import java.util.Date;
 /**
  * User Service
  * This class is the "worker" and responsible for all functionality related to
@@ -40,8 +40,6 @@ public class UserService {
   }
 
   public User createUser(User newUser) {
-    newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
     User existinguser = checkIfUserExists(newUser);
     if (existinguser!=null){
         if (!existinguser.getPassword().equals(newUser.getPassword())) {
@@ -50,7 +48,10 @@ public class UserService {
         else {
             return checkIfUserExists(newUser);
         }
-    };
+    }
+    newUser.setToken(UUID.randomUUID().toString());
+    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setCreationDate(new Date());
     // saves the given entity but data is only persisted in the database once
     // flush() is called
     newUser = userRepository.save(newUser);
