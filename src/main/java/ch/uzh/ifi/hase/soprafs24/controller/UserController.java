@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * User Controller
- * This class is responsible for handling all REST request that are related to
+ * This class is responsible for handling all REST requests related to
  * the user.
  * The controller will receive the request and delegate the execution to the
  * UserService and finally return the result.
@@ -23,18 +23,18 @@ import java.util.List;
 @RestController
 public class UserController {
 
-  private final UserService userService;
+    private final UserService userService;
 
-  UserController(UserService userService) {
-    this.userService = userService;
-  }
+    UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<UserGetDTO> getAllUsers(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-      if (authorizationHeader == null||authorizationHeader.isEmpty() ) {
+        if (authorizationHeader == null || authorizationHeader.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token");
         }
 
@@ -54,24 +54,48 @@ public class UserController {
         }
         return userGetDTOs;
     }
-  @PostMapping("/users")
-  @ResponseStatus(HttpStatus.CREATED)
-  @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
-    // convert API user to internal representation
-    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
-    // create user
-    User createdUser = userService.createUser(userInput);
-    createdUser.setStatus(UserStatus.ONLINE);
-    // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
-  }
+    @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+        // Convert API user to internal representation
+        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+
+        // Create user
+        User createdUser = userService.createUser(userInput);
+        // Convert internal representation of user back to API
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    }
+
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetDTO getUserById(@PathVariable Long userId) {
+    public UserGetDTO getUserById(@PathVariable Long userId,
+                                  @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        // Verify token before proceeding
+        if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token");
+        }
+
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+        if (!userService.verifyToken(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token");
+        }
+
+        // Fetch user by ID
         User user = userService.getUserById(userId);
         return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+    }
+
+    @PutMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(@RequestHeader(value = "Authorization") String authorizationHeader) {
+        // Extract token from the Authorization header
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+        // Change the user status to offline
+        userService.changeStatusToOffline(token);
     }
 }
