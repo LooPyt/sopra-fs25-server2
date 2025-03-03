@@ -64,6 +64,7 @@ public class UserService {
             return newUser;
         }
     }
+    public void saveUser(User ToSave){userRepository.save(ToSave);}
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)

@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -89,6 +90,34 @@ public class UserController {
         return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
     }
 
+    @PutMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateUserMasterData(@PathVariable Long id,
+                                     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+                                     @RequestBody UserPutDTO userPutDTO) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+        if (!userService.verifyToken(token)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token");
+        }
+
+        // Hole den Benutzer aus der Datenbank basierend auf der ID
+        User existingUser = userService.getUserById(id);
+
+        // Überprüfe, ob der Benutzer existiert
+        if (existingUser == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id "+ id +" was not found");
+        }
+
+        // Aktualisiere die relevanten Daten des Benutzers
+        // (z.B., Name, Username, Geburtsdatum, etc.) basierend auf den Daten im userPutDTO
+        existingUser.setBirthDate(userPutDTO.getBirthDate());
+        existingUser.setUsername(userPutDTO.getUsername());
+        // Füge weitere Aktualisierungen hier hinzu...
+
+        // Speichere den aktualisierten Benutzer in der Datenbank
+        userService.saveUser(existingUser);
+    }
     @PutMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@RequestHeader(value = "Authorization") String authorizationHeader) {

@@ -12,6 +12,9 @@ public class UserPutDTO {
     public UserStatus getStatus() {
         return status;}
     public void setStatus(UserStatus status){this.status = status;}
+
+    public String getToken() {return token;}
+    public void setToken(String token){this.token = token;}
     public String getUsername() {
         return username;
     }
