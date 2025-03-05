@@ -53,14 +53,16 @@ public class UserControllerTest {
 
     List<User> allUsers = Collections.singletonList(user);
 
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    given(userService.getUsers()).willReturn(allUsers);
+      String validToken = "valid-token";
+      given(userService.verifyToken(validToken)).willReturn(true);
+      given(userService.getUsers()).willReturn(allUsers);
 
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users").contentType(MediaType.APPLICATION_JSON);
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users")
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("Authorization", "Bearer " + validToken); // Hier wird das Token hinzugefügt
 
-    // then
+      // then
     mockMvc.perform(getRequest).andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].name", is(user.getName())))

@@ -125,7 +125,7 @@ public class UserService {
         User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
 
         String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-        if (userByUsername != null && userToBeCreated.getName() != null) {
+        if (userByUsername != null) {//Anpassungen -> Namensprüfung gelöscht, da gemäss Test keine Exception
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
         }
 

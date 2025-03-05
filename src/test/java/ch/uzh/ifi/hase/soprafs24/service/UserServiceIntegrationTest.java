@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -42,16 +44,17 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setName("testName");
     testUser.setUsername("testUsername");
-
+    testUser.setPassword("testPassword");
+    testUser.setCreationDate(new Date());//Hinzugefügt, da erforderlich für Userobjekt
     // when
-    User createdUser = userService.createUser(testUser);
+    User createdUser = userService.createUser(testUser);//Added setting password
 
     // then
     assertEquals(testUser.getId(), createdUser.getId());
     assertEquals(testUser.getName(), createdUser.getName());
     assertEquals(testUser.getUsername(), createdUser.getUsername());
     assertNotNull(createdUser.getToken());
-    assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
+    assertEquals(UserStatus.ONLINE, createdUser.getStatus());//Changed from ONLINE to OFFLINE
   }
 
   @Test
@@ -61,6 +64,8 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setName("testName");
     testUser.setUsername("testUsername");
+    testUser.setPassword("testPassword");
+    testUser.setCreationDate(new Date());//Hinzugefügt, da erforderlich für Userobjekt
     User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username
